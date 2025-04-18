@@ -1,3 +1,4 @@
+import pandas as pd
 from itertools import product
 
 # Prior and Conditional Probability Tables
@@ -24,9 +25,18 @@ def joint_probability(b, e, a, j, m):
 def query_burglary(johnCalls=True, maryCalls=True):
     probs = {True: 0.0, False: 0.0}
     
-    # Loop through all combinations of hidden variables B, E, and A
-    for b, e, a in product([True, False], repeat=3):
-        jp = joint_probability(b, e, a, johnCalls, maryCalls)
+    # Read data from CSV
+    data = pd.read_csv('./CSV/bbn.csv')
+    
+    # Loop through all combinations of hidden variables B, E, and A from the CSV
+    for _, row in data.iterrows():
+        b = row['B']
+        e = row['E']
+        a = row['A']
+        j = row['JohnCalls'] == 1
+        m = row['MaryCalls'] == 1
+        
+        jp = joint_probability(b, e, a, j, m)
         probs[b] += jp
 
     # Normalize the result
