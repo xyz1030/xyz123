@@ -1,0 +1,148 @@
+Absolutely, here’s a detailed explanation of each part of your **KMeans clustering implementation in Python**, written manually from scratch (no external libraries used):
+
+---
+
+### 📌 1. **Loading the CSV File**
+```python
+def load_data(filename):
+    ...
+```
+- Reads the file line by line.
+- Skips the first row (header).
+- Converts string values to `float` for each row and stores them in a list of `[feature1, feature2]`.
+
+🔍 **Why?** KMeans requires numerical input. This function gets your raw data ready for processing.
+
+---
+
+### 📌 2. **Min-Max Scaling**
+```python
+def scale_data(data):
+    ...
+```
+- It rescales feature1 and feature2 into the `[0, 1]` range.
+- This is done using:
+  \[
+  x' = \frac{x - \text{min}}{\text{max} - \text{min}}
+  \]
+- Ensures all features contribute equally when calculating distances.
+
+🔍 **Why?** Prevents features with larger values from dominating the clustering.
+
+---
+
+### 📌 3. **Distance Function**
+```python
+def distance(p1, p2):
+    ...
+```
+- Calculates the **Euclidean distance** between 2 points:
+  \[
+  \text{dist} = \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}
+  \]
+
+🔍 **Why?** Distance metric is at the heart of clustering—used to group nearby points.
+
+---
+
+### 📌 4. **Assigning Points to Nearest Centroid**
+```python
+def assign_clusters(data, centroids):
+    ...
+```
+- For every point:
+  - Computes its distance to each centroid.
+  - Assigns it to the closest one (minimum distance).
+
+🔍 **Why?** Forms the basis of clusters by proximity.
+
+---
+
+### 📌 5. **Recomputing Centroids**
+```python
+def compute_centroids(data, clusters, k):
+    ...
+```
+- For each cluster:
+  - Averages the `x` and `y` of points belonging to that cluster.
+- Returns updated centroids.
+
+🔍 **Why?** Each iteration moves centroids closer to the true "center" of the data assigned to them.
+
+---
+
+### 📌 6. **Convergence Check**
+```python
+def has_converged(old, new):
+    ...
+```
+- Compares old and new centroids.
+- If they don’t change significantly (within `1e-4`), training stops.
+
+🔍 **Why?** Saves computation—stops once the solution is stable.
+
+---
+
+### 📌 7. **Main KMeans Logic**
+```python
+def kmeans(data, k, max_iter=100):
+    ...
+```
+- Starts with `k` random data points as initial centroids.
+- Then it:
+  1. Assigns all points to the closest centroid.
+  2. Updates centroids.
+  3. Repeats until convergence or max iterations.
+
+🔍 **Why?** Implements the basic KMeans loop.
+
+---
+
+### 📌 8. **Results**
+```python
+def print_result(data, clusters, centroids):
+    ...
+```
+- Prints final cluster centers (rounded).
+- Prints every point with its cluster number.
+
+---
+
+### 📌 9. **Execution Block**
+```python
+if __name__ == "__main__":
+    ...
+```
+- Loads and scales data.
+- Runs `kmeans` for `k=3`.
+- Prints the output.
+
+---
+
+### ✅ Example Output (for understanding):
+Suppose we had this:
+```
+Final Centroids:
+Cluster 0: (0.12, 0.82)
+Cluster 1: (0.65, 0.48)
+Cluster 2: (0.90, 0.13)
+
+Data points with cluster labels:
+Point 1: (0.1, 0.8) → Cluster 0
+Point 2: (0.7, 0.5) → Cluster 1
+Point 3: (0.9, 0.1) → Cluster 2
+...
+```
+
+---
+
+### 🔁 Summary of Workflow:
+```
+CSV → Load → Scale → Random Centroids
+     ↓             ↘
+     Assign Points → Update Centroids → Check Convergence → Repeat
+                              ↓
+                          Final Clusters
+```
+
+---

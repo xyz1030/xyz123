@@ -1,0 +1,152 @@
+### What is DBSCAN?
+
+**DBSCAN (Density-Based Spatial Clustering of Applications with Noise)** is a popular clustering algorithm that groups points based on density. It works by identifying dense regions of points and expanding clusters from those regions. Points that are in low-density areas (sparse regions) are labeled as "noise."
+
+The key concepts of DBSCAN are:
+- **Epsilon (eps)**: This is the radius of a neighborhood around a point. If two points are within this radius, they are considered neighbors.
+- **Min_samples**: This is the minimum number of points required to form a dense region (i.e., a cluster). If a region contains fewer than `min_samples` points within `eps`, it is considered noise.
+- **Core Points**: A point is considered a core point if it has at least `min_samples` points within `eps` distance.
+- **Border Points**: Points that are not core points but lie within the `eps` distance of a core point.
+- **Noise Points**: Points that do not meet the density requirements to be part of any cluster.
+
+### How DBSCAN Works?
+
+1. **Start with an unvisited point**. Check how many points are within its neighborhood (defined by `eps`).
+2. **If the point has enough neighbors** (greater than or equal to `min_samples`), it becomes a **core point** and a new cluster is formed.
+3. **Expand the cluster** by checking all neighbors of the core point. If any of them also have enough neighbors, they are added to the cluster.
+4. **Repeat the process** until all points are either assigned to a cluster or labeled as noise.
+5. **Noise points** are those that cannot form a cluster because they don't have enough neighbors within `eps`.
+
+### DBSCAN Algorithm Steps (Manual Code Breakdown):
+
+#### Step 1: **Initialization**
+We define the class `DBSCAN` with parameters:
+- `eps`: The maximum distance between two points for them to be considered neighbors.
+- `min_samples`: The minimum number of points required to form a dense cluster.
+- `labels`: A list to store the cluster label assigned to each point (or `-1` for noise).
+
+#### Step 2: **`fit()` method**
+This is the main method where the clustering takes place. It iterates through each point in the dataset and checks its neighbors.
+- If a point is already visited, it skips to the next.
+- For unvisited points, it performs a **region query** (using `self._region_query()`) to find points that are within `eps` distance.
+- If there are enough neighbors (≥ `min_samples`), it expands the cluster (using `self._expand_cluster()`).
+- Otherwise, the point is labeled as noise (`-1`).
+
+#### Step 3: **`_expand_cluster()` method**
+If a point is found to be a core point, we expand the cluster by visiting its neighbors. If a neighbor is also a core point, its neighbors are added to the list of neighbors. This process is repeated until all reachable points are assigned to the cluster.
+
+#### Step 4: **`_region_query()` method**
+This method computes the **Euclidean distance** between the current point and all other points in the dataset. It returns a list of indexes of the neighbors that are within `eps` distance.
+
+#### Step 5: **`_euclidean_distance()` method**
+Calculates the Euclidean distance between two points using the formula:
+
+\[
+\text{distance} = \sqrt{\sum_{i=1}^{n} (x_i - y_i)^2}
+\]
+
+where \( x_i \) and \( y_i \) are the coordinates of the two points.
+
+#### Step 6: **`predict()` method**
+After fitting the model, this method returns the **cluster labels** for all the data points. Each point is assigned to a cluster (represented by an integer) or labeled as noise (`-1`).
+
+---
+
+### Code Explanation:
+
+```python
+import math
+
+class DBSCAN:
+    def __init__(self, eps=0.5, min_samples=5):
+        self.eps = eps  # The maximum distance between two points for them to be considered neighbors
+        self.min_samples = min_samples  # Minimum number of points required to form a dense region (cluster)
+        self.labels = None  # Labels assigned to each point (cluster id or -1 for noise)
+
+    def fit(self, X):
+        n_samples = len(X)
+        self.labels = [-1] * n_samples  # Initially, all points are considered noise (-1)
+        visited = [False] * n_samples  # To keep track of visited points
+        cluster_id = 0  # Start with the first cluster id
+
+        for i in range(n_samples):
+            if visited[i]:
+                continue  # Skip if point is already visited
+            visited[i] = True
+            neighbors = self._region_query(X, i)  # Get all points within eps distance
+
+            if len(neighbors) < self.min_samples:
+                self.labels[i] = -1  # Mark as noise if not enough neighbors
+            else:
+                self._expand_cluster(X, i, neighbors, cluster_id, visited)  # Expand the cluster
+                cluster_id += 1  # Increment the cluster id after completing one cluster
+
+    def _expand_cluster(self, X, i, neighbors, cluster_id, visited):
+        # Assign the cluster id to the current point
+        self.labels[i] = cluster_id
+        j = 0
+        while j < len(neighbors):
+            point = neighbors[j]
+            if not visited[point]:
+                visited[point] = True
+                new_neighbors = self._region_query(X, point)
+                if len(new_neighbors) >= self.min_samples:
+                    neighbors += new_neighbors  # Add the new neighbors to the list
+            if self.labels[point] == -1:
+                self.labels[point] = cluster_id  # Assign the point to the current cluster
+            j += 1
+
+    def _region_query(self, X, i):
+        # Compute distances from point i to all other points and return neighbors within eps distance
+        distances = [self._euclidean_distance(X[i], X[j]) for j in range(len(X))]
+        return [idx for idx, dist in enumerate(distances) if dist <= self.eps]
+
+    def _euclidean_distance(self, p1, p2):
+        # Calculate Euclidean distance between points p1 and p2
+        return math.sqrt(sum((a - b) ** 2 for a, b in zip(p1, p2)))
+
+    def predict(self):
+        # Return the labels (cluster ids) for all the points
+        return self.labels
+
+def load_csv(filename):
+    # Load CSV file and return data as a list of points
+    X = []
+    with open(filename, 'r') as f:
+        for line in f:
+            points = list(map(float, line.strip().split(',')))  # Convert each value to float
+            X.append(points)
+    return X
+
+if __name__ == "__main__":
+    # Load the data from the CSV file
+    filename = "./CSV/dbscan.csv"  # Ensure the file exists and has the data
+    X = load_csv(filename)
+
+    # Create and fit the DBSCAN model
+    model = DBSCAN(eps=1.0, min_samples=3)
+    model.fit(X)
+
+    # Get the cluster labels
+    labels = model.predict()
+
+    # Print the predicted labels for each point
+    print("Predicted labels:", labels)
+```
+
+### Example CSV (`dbscan.csv`):
+
+```
+1.0,2.0
+1.5,1.8
+5.0,8.0
+8.0,8.0
+1.0,0.6
+9.0,11.0
+```
+
+### Key Points:
+- The output labels correspond to the **cluster assignments** for each point. Points that are far from any dense region (not forming a cluster) will be assigned `-1` (denoting noise).
+- This implementation does not use any external libraries except for Python's **`math` module** for distance calculations.
+
+---

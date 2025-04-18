@@ -1,0 +1,143 @@
+### Explanation of the **CLIQUE (CLustering In QUEst)** Algorithm:
+
+**CLIQUE** is a grid-based clustering algorithm that divides the feature space into a uniform grid. It then identifies clusters of points based on the density of points in each grid cell. It is particularly useful for discovering clusters in high-dimensional data, as it reduces the dimensionality by applying a grid structure to the feature space.
+
+Here’s a breakdown of how the **CLIQUE** algorithm works:
+
+1. **Grid-based Clustering**: 
+   - The data space is divided into grid cells with a fixed size.
+   - Points that fall into the same grid cell are grouped together.
+   
+2. **Cluster Identification**: 
+   - If a grid cell contains more than a specified minimum number of points (based on density), it is considered as part of a cluster.
+   - These clusters can be expanded or merged based on density criteria (in this simplified version, only the grid-based labeling is done).
+
+3. **Dimensionality Reduction**:
+   - In high-dimensional spaces, CLIQUE can effectively reduce the complexity by mapping the data into lower-dimensional grid cells.
+
+### Code Breakdown:
+
+#### Step 1: **Initialization of CLIQUE class**
+
+```python
+class CLIQUE:
+    def __init__(self, grid_size=5):
+        self.grid_size = grid_size  # Size of each grid cell
+        self.grid_clusters = {}  # Dictionary to store the clusters formed by grid cells
+```
+
+- **`grid_size`**: This parameter determines the size of each grid cell. A smaller value will create more grid cells, while a larger value will create fewer and larger cells.
+- **`grid_clusters`**: This dictionary holds the points that belong to each grid cell. The key is the grid cell's coordinates, and the value is the list of indices of points that fall into that cell.
+
+#### Step 2: **`fit()` method**
+
+```python
+def fit(self, X):
+    # Iterating through each data point
+    for i in range(len(X)):
+        # Convert each data point into grid cell coordinates
+        grid_cell = tuple(int(val // self.grid_size) for val in X[i])
+
+        # Add the point to the corresponding grid cell
+        if grid_cell not in self.grid_clusters:
+            self.grid_clusters[grid_cell] = []
+        self.grid_clusters[grid_cell].append(i)
+```
+
+- The method **`fit()`** takes in the dataset `X` and iterates through each data point.
+- For each data point, it calculates the **grid cell** it belongs to by dividing each coordinate by `grid_size` and using integer division (`//`).
+- If the grid cell does not exist in the `grid_clusters` dictionary, it creates a new entry.
+- It then adds the index of the data point to the appropriate grid cell.
+
+#### Step 3: **`predict()` method**
+
+```python
+def predict(self, X):
+    # Initialize the label list with -1 (indicating noise)
+    labels = [-1] * len(X)
+    cluster_id = 0
+
+    # Assign a unique cluster ID to each grid cell
+    for cell, indices in self.grid_clusters.items():
+        for idx in indices:
+            labels[idx] = cluster_id
+        cluster_id += 1
+
+    return labels
+```
+
+- The **`predict()`** method assigns cluster labels to each data point.
+- Initially, every data point is considered as **noise**, labeled as `-1`.
+- The method then iterates over the grid cells stored in `grid_clusters` and assigns a unique cluster ID to the points in each grid cell.
+- Each grid cell gets a unique cluster ID, and points in the same grid cell receive the same label.
+
+#### Step 4: **`load_csv()` function**
+
+```python
+def load_csv(filename):
+    X = []
+    with open(filename, 'r') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            # Convert each value to float and add to X
+            X.append([float(val) for val in row])
+    return X
+```
+
+- This function loads data from a CSV file.
+- Each row is read, and the values are converted to `float` and stored in `X`, a list of data points.
+
+#### Step 5: **Main execution**
+
+```python
+if __name__ == "__main__":
+    # Load dataset from CSV
+    filename = "./CSV/clique.csv"  # Ensure this file exists in the same directory
+    X = load_csv(filename)
+
+    # Initialize the CLIQUE model with grid size of 5
+    model = CLIQUE(grid_size=5)
+
+    # Fit the model to the data
+    model.fit(X)
+
+    # Get the predicted labels for the clusters
+    labels = model.predict(X)
+
+    # Print the predicted cluster labels
+    print("Predicted cluster labels:", labels)
+```
+
+- The script loads a CSV file (`clique.csv`) containing the dataset.
+- It creates an instance of the **CLIQUE** class with a grid size of 5 and fits the model to the data using the `fit()` method.
+- Finally, the `predict()` method assigns cluster labels to the data points, and the results are printed.
+
+### Example:
+
+If the CSV file (`clique.csv`) looks like this:
+
+```
+1.0,2.0
+2.5,3.0
+4.0,5.0
+5.5,6.0
+7.0,8.0
+8.5,9.0
+```
+
+The algorithm will convert each point into grid cells based on its coordinates and grid size. After clustering, you might see output like:
+
+```
+Predicted cluster labels: [0, 0, 1, 1, 2, 2]
+```
+
+This output indicates that:
+- Points `[1.0, 2.0]` and `[2.5, 3.0]` belong to cluster 0.
+- Points `[4.0, 5.0]` and `[5.5, 6.0]` belong to cluster 1.
+- Points `[7.0, 8.0]` and `[8.5, 9.0]` belong to cluster 2.
+
+### Key Considerations:
+- **Grid size**: The `grid_size` parameter controls the resolution of the grid. A smaller grid size creates more grid cells, but if too small, it might lead to noise because fewer points fall into each cell.
+- **Density**: This simplified implementation does not explicitly check the density of points within a grid. You could extend the algorithm to only consider clusters where grid cells have enough points.
+  
+This algorithm is an **unsupervised clustering method** that is useful in high-dimensional spaces, as it simplifies the space into grids and clusters based on those grids.

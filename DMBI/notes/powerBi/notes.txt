@@ -1,0 +1,71 @@
+Got it! For a simple demonstration, you can read from an Excel file in Power BI instead of a database. Here's a step-by-step guide with a sample Excel dataset and how to implement it in Power BI.
+
+✅ Sample Excel Data (You can create this in Excel)
+Create a file named SalesData.xlsx and in Sheet1, add the following:
+
+
+Date	Product	Category	Units Sold	Unit Price	Total Sales
+2024-01-01	T-Shirt	Clothing	10	300	3000
+2024-01-02	Jeans	Clothing	5	1000	5000
+2024-01-03	Shoes	Footwear	8	1500	12000
+2024-01-04	Cap	Accessories	12	200	2400
+2024-01-05	Jacket	Clothing	3	2500	7500
+Save it as:
+📂 SalesData.xlsx
+
+🧠 Objective of Demo
+We will:
+
+Read the data from Excel into Power BI.
+
+Visualize total sales by category.
+
+Create a bar chart.
+
+📊 Steps in Power BI
+Step 1: Open Power BI Desktop
+Launch Power BI Desktop.
+
+Step 2: Import the Excel File
+Click “Home” > “Get Data” > “Excel”.
+
+Browse and select your SalesData.xlsx file.
+
+Select Sheet1 from the navigator.
+
+Click Load to import the data.
+
+Step 3: Explore the Data
+Once loaded:
+
+Check the fields in the Fields Pane on the right.
+
+You should see: Date, Product, Category, Units Sold, Unit Price, Total Sales.
+
+Step 4: Create a Visualization
+Click on the Bar Chart icon under Visualizations.
+
+Drag Category to the Axis.
+
+Drag Total Sales to the Values.
+
+You’ll see a bar chart of Total Sales by Category.
+
+Step 5: Optional – Add Filters or Slicers
+Click the Slicer icon.
+
+Drag Product to the slicer.
+
+Now you can filter the bar chart by product name.
+
+Step 6: Save the Report
+Click File > Save As and save your Power BI file (e.g., SalesReport.pbix).
+
+🖼 Example Visualization
+Your Power BI dashboard will show:
+
+A bar chart comparing Total Sales across Clothing, Footwear, and Accessories.
+
+Optional slicer to filter by product.
+
+Would you like me to generate and send you this sample Excel file (SalesData.xlsx)?

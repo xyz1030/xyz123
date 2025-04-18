@@ -1,0 +1,199 @@
+You're implementing a **Naive Bayes Classifier** manually — and it’s done very well without using any external libraries. Let's go through your code **step by step**, explaining both **concepts** and **code behavior** clearly.
+
+---
+
+## 🔶 What is Naive Bayes?
+
+Naive Bayes is a probabilistic classifier based on **Bayes’ Theorem**, assuming independence between features.
+
+**Bayes' Theorem:**
+\[
+P(C|X) = \frac{P(X|C) \cdot P(C)}{P(X)}
+\]
+
+In classification, you calculate the probability of each class (C) given the input features (X), and choose the class with the **highest posterior probability**.
+
+---
+
+## 🔍 What Does Your Code Do?
+
+You're classifying rows in a dataset (e.g., weather data) based on the **Naive Bayes algorithm**. You:
+
+1. Load the dataset.
+2. Calculate prior probabilities \( P(C) \).
+3. Calculate likelihoods \( P(feature=value | class) \).
+4. Predict the class of a new instance using the Naive Bayes formula.
+
+---
+
+## 📘 Explanation of Each Function:
+
+### ✅ 1. `load_csv(filename)`
+
+```python
+def load_csv(filename):
+    data = []
+    with open(filename, 'r') as f:
+        reader = csv.reader(f)
+        headers = next(reader)  # first row is header
+        for row in reader:
+            data.append(dict(zip(headers, row)))
+    return headers, data
+```
+
+- **What it does**: Reads your CSV file.
+- **Returns**:
+  - `headers`: List of column names.
+  - `data`: A list of dictionaries, each representing a row like:
+    ```python
+    {'Outlook': 'Sunny', 'Temperature': 'Hot', 'Humidity': 'High', 'Windy': 'False', 'Play': 'No'}
+    ```
+
+---
+
+### ✅ 2. `calculate_prior(data, target)`
+
+```python
+def calculate_prior(data, target):
+    counts = {}
+    total = len(data)
+    for row in data:
+        label = row[target]
+        counts[label] = counts.get(label, 0) + 1
+    prior = {}
+    for label in counts:
+        prior[label] = counts[label] / total
+    return prior
+```
+
+- **What it does**: Calculates the **prior probabilities** \( P(C) \) for each class.
+- **Example**:
+  If 9 out of 14 rows are "Yes", then:
+  \[
+  P(\text{Yes}) = \frac{9}{14},\quad P(\text{No}) = \frac{5}{14}
+  \]
+
+---
+
+### ✅ 3. `calculate_likelihood(data, features, target)`
+
+```python
+def calculate_likelihood(data, features, target):
+    likelihood = {}
+    target_values = set(row[target] for row in data)
+
+    for feature in features:
+        likelihood[feature] = {}
+        feature_values = set(row[feature] for row in data)
+
+        for value in feature_values:
+            likelihood[feature][value] = {}
+
+            for t_val in target_values:
+                num = 0
+                denom = 0
+                for row in data:
+                    if row[target] == t_val:
+                        denom += 1
+                        if row[feature] == value:
+                            num += 1
+                likelihood[feature][value][t_val] = num / denom if denom != 0 else 0
+    return likelihood
+```
+
+- **What it does**: Calculates \( P(\text{feature=value} \mid \text{class}) \).
+- For each feature and each possible value, it checks how often it appears under each class.
+- This is the **conditional probability** part of Bayes’ theorem.
+
+---
+
+### ✅ 4. `predict(instance, prior, likelihood, target_values)`
+
+```python
+def predict(instance, prior, likelihood, target_values):
+    probs = {}
+    for t_val in target_values:
+        prob = prior.get(t_val, 0)
+        for feature, val in instance.items():
+            prob *= likelihood[feature].get(val, {}).get(t_val, 0)
+        probs[t_val] = prob
+    return max(probs, key=probs.get)
+```
+
+- **What it does**: Calculates \( P(C|X) \) for each class.
+- Starts with prior \( P(C) \), multiplies it by each likelihood \( P(feature=value | C) \).
+- Returns the class with **maximum probability**.
+
+---
+
+## 📦 Example Usage
+
+Given:
+```python
+test_instance = {'Outlook': 'Sunny', 'Temperature': 'Cool', 'Humidity': 'High', 'Windy': 'True'}
+```
+
+It will compute:
+
+\[
+P(\text{Yes} | \text{Sunny, Cool, High, True}) \propto P(\text{Yes}) \times P(\text{Sunny}|\text{Yes}) \times ...
+\]
+
+And similarly for "No".
+
+Whichever is higher, that’s your predicted class.
+
+---
+
+## ✅ Full Flow Recap:
+
+1. Load data from CSV.
+2. Extract feature names and labels.
+3. Compute prior probabilities.
+4. Compute conditional (likelihood) probabilities.
+5. Predict the class of a new input using Bayes’ rule.
+
+---
+
+## 🧪 Sample CSV (basyen.csv)
+
+Here’s a minimal sample of your `basyen.csv`:
+
+```csv
+Outlook,Temperature,Humidity,Windy,Play
+Sunny,Hot,High,False,No
+Sunny,Hot,High,True,No
+Overcast,Hot,High,False,Yes
+Rain,Mild,High,False,Yes
+Rain,Cool,Normal,False,Yes
+Rain,Cool,Normal,True,No
+Overcast,Cool,Normal,True,Yes
+Sunny,Mild,High,False,No
+Sunny,Cool,Normal,False,Yes
+Rain,Mild,Normal,False,Yes
+Sunny,Mild,Normal,True,Yes
+Overcast,Mild,High,True,Yes
+Overcast,Hot,Normal,False,Yes
+Rain,Mild,High,True,No
+```
+
+---
+
+## ✅ Final Output
+
+When you run the script, output will be:
+```
+Prediction: No   # or Yes depending on the calculated probabilities
+```
+
+---
+
+## ✅ Suggestions
+
+- You could implement **Laplace smoothing** (add-one smoothing) to handle zero probabilities.
+- You might print intermediate values for better debugging (like prior, likelihoods, probabilities).
+- For larger datasets, optimize with pre-processing or caching.
+
+---
+
+Let me know if you want to extend this into a GUI or convert to numeric features automatically!

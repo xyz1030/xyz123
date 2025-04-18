@@ -1,0 +1,165 @@
+Absolutely! Let's go through this step-by-step just like we did before, starting with the theory and then the full code explanation of your **manual implementation of Backpropagation for a Feedforward Neural Network**.
+
+---
+
+## 🌟 What is Backpropagation?
+
+Backpropagation is the learning algorithm used to **train feedforward neural networks**. It works in two phases:
+
+1. **Forward Pass:** Input data is passed through the network to generate predictions.
+2. **Backward Pass (Backpropagation):** The error between the prediction and actual output is calculated. Then the weights are adjusted (using derivatives) to minimize this error using **Gradient Descent**.
+
+---
+
+## 🧠 Network Structure Used
+
+- **Input Layer**: 2 neurons (e.g., study hours, sleep hours).
+- **Hidden Layer**: 10 neurons.
+- **Output Layer**: 1 neuron (predicted result).
+- **Activation Function**: Sigmoid (used for non-linearity).
+
+---
+
+## 📘 Explanation of the Code (Step-by-step)
+
+### 1. Load CSV Data
+
+```python
+def load_csv(filename):
+    ...
+```
+
+- Reads the CSV file line-by-line.
+- Skips the header.
+- Converts inputs to `float` and outputs to `float`.
+- Returns data as list of tuples: `([features], output)`
+
+---
+
+### 2. Normalize the Dataset
+
+```python
+def normalize_dataset(dataset):
+    ...
+```
+
+- Uses **Z-score normalization** to scale each feature to have mean 0 and standard deviation 1.
+- Helps the model converge faster during training.
+
+---
+
+### 3. Sigmoid Activation & Derivative
+
+```python
+def sigmoid(x): ...
+def sigmoid_derivative(x): ...
+```
+
+- `sigmoid(x) = 1 / (1 + e^(-x))` squashes values between 0 and 1.
+- `sigmoid_derivative(x) = x * (1 - x)` is used in gradient computation during backpropagation.
+
+---
+
+### 4. Initialize Weights Randomly
+
+```python
+def initialize_weights(n_inputs, n_hidden, n_outputs):
+    ...
+```
+
+- Initializes:
+  - `input-to-hidden` weights: shape (2 × 10)
+  - `hidden-to-output` weights: shape (10 × 1)
+- Values are initialized between [-1, 1].
+
+---
+
+### 5. Dot Product Calculation
+
+```python
+def dot(v1, v2): ...
+```
+
+- Custom implementation to compute dot product of two vectors.
+- Used in forward pass to compute neuron activation.
+
+---
+
+### 6. Forward Pass
+
+```python
+def forward(inputs, weights_input_hidden, weights_hidden_output):
+    ...
+```
+
+- Computes activations of:
+  - **Hidden Layer**: using weighted sum and sigmoid.
+  - **Output Layer**: again weighted sum and sigmoid.
+- Returns both `hidden_output` and `final_output`.
+
+---
+
+### 7. Backward Pass and Training
+
+```python
+def train(...):
+    ...
+```
+
+- For `epochs` number of iterations:
+  - Performs **forward pass** to get outputs.
+  - Computes **error** = target - prediction.
+  - Computes **derivatives** using sigmoid and propagates them backward.
+  - Updates weights using **learning rate × error × input**.
+  - Logs the error every 500 epochs.
+
+---
+
+### 8. Predict After Training
+
+```python
+def predict(...):
+    ...
+```
+
+- Runs the final trained model on the input dataset.
+- Returns predicted outputs (after sigmoid).
+
+---
+
+### 9. Final Output
+
+```python
+print("Input: ..., Actual: ..., Predicted: ...")
+```
+
+- Prints input values, actual outputs, and predicted outputs (rounded to 3 decimal places).
+
+---
+
+## 🧪 Example Output (Sample)
+
+```bash
+Epoch 0, Mean Absolute Error: 0.4321
+...
+Epoch 4500, Mean Absolute Error: 0.0123
+
+Final Predictions vs Actual Output:
+Input: [-0.3, 1.4], Actual: 1.0, Predicted: 0.97
+Input: [1.2, -0.7], Actual: 0.0, Predicted: 0.04
+...
+```
+
+---
+
+## ✅ Summary
+
+| Component        | Role                                                                 |
+|------------------|----------------------------------------------------------------------|
+| `forward()`      | Pass inputs through network and generate prediction                 |
+| `sigmoid()`      | Adds non-linearity so model learns complex patterns                 |
+| `train()`        | Does backpropagation + gradient descent to update weights           |
+| `normalize_dataset()` | Scales input features to improve learning stability            |
+| `predict()`      | Uses trained weights to make final predictions                      |
+
+---

@@ -1,0 +1,1 @@
+pip install numpy matplotlib pandas scikit-learn seaborn networkx pyvis mysql-connector-python openpyxl xlrd xlsxwriter graphviz pydotplus

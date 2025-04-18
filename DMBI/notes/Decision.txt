@@ -1,0 +1,210 @@
+Sure! Let’s go step by step in a **flow-wise explanation** of how your **manual decision tree** code works. I’ll explain the logic clearly and in simple terms — even if you're new to Python.
+
+---
+
+## 🔁 High-Level Flow (How This Code Runs):
+
+1. **Read Titanic data** from a CSV file.
+2. **Build a decision tree** based on this data (using Gini impurity).
+3. **Print the decision tree** in a readable format.
+4. **Predict survival for the first passenger in the data** using the decision tree.
+
+---
+
+## 🧠 Background Concepts
+
+- **Decision Tree** is a model used to make decisions. It keeps splitting the data into branches based on conditions (like "Age < 15?" or "Sex = male?").
+- **Gini impurity** measures how "mixed" the classes are (how pure or impure the branch is).
+
+---
+
+## 💡 Step-by-Step Code Breakdown
+
+---
+
+### 1. 📂 `load_csv(filename)`
+
+**What it does:**  
+Reads data from a CSV file line-by-line.
+
+```python
+inputs = [
+    float(row[0]),      # Age
+    row[1].strip(),     # Passenger Class
+    row[2].strip(),     # Sex
+    float(row[3]),      # Siblings/Spouses
+    float(row[4]),      # Parents/Children
+    float(row[5])       # Fare
+]
+label = row[6].strip()  # Survived: Yes/No
+```
+
+✅ Converts values to correct types (like float for numbers, string for text).
+
+📌 It stores data as:  
+`data = [ ([features], label), ... ]`
+
+---
+
+### 2. 🧭 `build_categories(data)`
+
+**Purpose:**  
+Identifies all **unique values** for the categorical features (like "Sex").
+
+```python
+for idx, ftype in enumerate(FEATURE_TYPES):
+    if ftype == 'cat':
+        cats[idx] = set(sample[0][idx] for sample in data)
+```
+
+📌 This helps when comparing categories like "male" or "female".
+
+---
+
+### 3. 📊 `count_labels(labels)` and `gini(labels)`
+
+**`count_labels()`**: Counts how many 'Yes' and 'No' labels are present.  
+**`gini()`**: Measures impurity of the list. Lower Gini = better split.
+
+Example:
+
+```python
+labels = ['Yes', 'No', 'No', 'Yes']
+# Output: {'Yes': 2, 'No': 2}
+# Gini: 1 - (0.5² + 0.5²) = 0.5
+```
+
+---
+
+### 4. 🔍 `best_split(data)`
+
+**Goal:**  
+Find the **best feature and threshold** to split the data for best classification.
+
+How?
+
+- Try each feature (Age, Fare, etc.)
+- Try different split points
+- Calculate Gini impurity
+- Choose the split with **lowest impurity**
+
+For example:
+```python
+If "Sex = male" gives better separation → choose it.
+If "Fare <= 20" gives better split → choose it.
+```
+
+Returns:
+```python
+(feature_index, threshold_value, feature_type)
+```
+
+---
+
+### 5. 🌲 `build_tree(data, depth=0, max_depth=6)`
+
+**This is the core recursion function** that builds the full tree.
+
+Steps:
+
+1. If all data is the same label → make a **leaf node** (stop).
+2. If max depth reached → also make a leaf.
+3. Otherwise:
+    - Find best split.
+    - Split data into left and right groups.
+    - Call `build_tree()` on each half recursively.
+
+```python
+if node is leaf:
+    return {'leaf': True, 'prediction': label, 'counts': ...}
+else:
+    return {
+        'leaf': False,
+        'feature': feature_id,
+        'threshold': value,
+        'left': left_tree,
+        'right': right_tree
+    }
+```
+
+So it keeps splitting the dataset till it reaches leaf nodes.
+
+---
+
+### 6. 🧾 `print_tree(node, categories, depth=0, condition=None)`
+
+This function **prints the tree** in a readable format.
+
+Example output:
+```
+Tree
+|   Passenger Class = 3rd
+|   |   Age <= 25.0: No {Yes=3, No=5}
+|   |   Age > 25.0: Yes {Yes=4, No=1}
+```
+
+Each level is indented using `|   ` to represent depth.
+
+---
+
+### 7. 🔮 `predict_sample(x, node)`
+
+This walks through the tree to **predict for a given input**.
+
+- If it hits a leaf node → returns the prediction.
+- Otherwise → checks the condition (like `Age <= 20`) and goes left/right accordingly.
+
+Example:
+```python
+if x[Age] <= 20 → go left → check next node → finally reach prediction
+```
+
+---
+
+### 8. ▶️ `__main__` block (runs when you execute the file)
+
+```python
+data       = load_csv(FILENAME)
+categories = build_categories(data)
+tree       = build_tree(data)
+print_tree(tree, categories)
+```
+
+Prints the decision tree. Then:
+```python
+sample = data[0][0]
+print(predict_sample(sample, tree))
+```
+
+Predicts **whether the first passenger survived or not**.
+
+---
+
+## 💡 How Recursion Works in This Tree:
+
+Each time `build_tree()` is called:
+- It chooses the best split.
+- Divides the data into two groups.
+- Calls itself again on each group.
+- This continues until:
+  - All values in the group are the same label (pure), or
+  - Max depth is reached.
+
+---
+
+## 🧑‍🏫 Python Terms You Should Know
+
+| Term         | Meaning |
+|--------------|---------|
+| `def`        | defines a function |
+| `float()`    | converts a value to decimal |
+| `if ... else`| condition check |
+| `for ... in` | loop |
+| `return`     | gives output from function |
+| `[]`         | list (like array) |
+| `set()`      | unique values |
+| `'key': value` | dictionary (object/map) |
+
+---
+
+Would you like a **visual example** of how a sample gets classified in the tree? Or would you like me to **simplify and explain the Gini calculation with values**?

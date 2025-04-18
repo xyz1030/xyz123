@@ -1,0 +1,137 @@
+You've manually implemented **Bayesian Inference** on the **Burglary-Alarm Bayesian Network** — one of the most famous examples in AI and probabilistic reasoning.
+
+---
+
+### 🔍 Problem Summary
+
+You are trying to compute:
+
+> **P(Burglary = True | JohnCalls = True, MaryCalls = True)**
+
+Given the Bayesian Network structure:
+
+```
+  B      E
+   \    /
+    A (Alarm)
+   / \
+  J   M
+```
+
+- B = Burglary  
+- E = Earthquake  
+- A = Alarm  
+- J = JohnCalls  
+- M = MaryCalls  
+
+---
+
+## ✅ Step-by-step Explanation of the Code
+
+---
+
+### 1. **Prior and Conditional Probabilities**
+
+#### a. Priors:
+```python
+P_B = {True: 0.001, False: 0.999}
+P_E = {True: 0.002, False: 0.998}
+```
+- Small chances of burglary and earthquake.
+
+#### b. Conditional: Alarm depends on Burglary & Earthquake:
+```python
+P_A = {
+    (True, True):  {True: 0.95, False: 0.05},
+    (True, False): {True: 0.94, False: 0.06},
+    (False, True): {True: 0.29, False: 0.71},
+    (False, False):{True: 0.001, False: 0.999}
+}
+```
+
+#### c. John's and Mary's calls depend on Alarm:
+```python
+P_J = {True: {True: 0.90, False: 0.10}, False: {True: 0.05, False: 0.95}}
+P_M = {True: {True: 0.70, False: 0.30}, False: {True: 0.01, False: 0.99}}
+```
+
+---
+
+### 2. **Joint Probability Function**
+
+```python
+def joint_probability(b, e, a, j, m):
+    return (P_B[b] *
+            P_E[e] *
+            P_A[(b, e)][a] *
+            P_J[a][j] *
+            P_M[a][m])
+```
+
+This calculates:
+
+\[
+P(B, E, A, J, M) = P(B) \cdot P(E) \cdot P(A|B,E) \cdot P(J|A) \cdot P(M|A)
+\]
+
+---
+
+### 3. **Query Function: `query_burglary()`**
+
+```python
+def query_burglary(johnCalls=True, maryCalls=True):
+    probs = {True: 0.0, False: 0.0}
+    
+    for b, e, a in product([True, False], repeat=3):  # 8 combinations
+        jp = joint_probability(b, e, a, johnCalls, maryCalls)
+        probs[b] += jp
+
+    total = probs[True] + probs[False]
+    if total > 0:
+        probs[True] /= total
+        probs[False] /= total
+
+    return probs
+```
+
+- Loops through **all combinations of B, E, A** — since J and M are observed (known).
+- For each combination:
+  - It calculates the joint probability of that scenario.
+  - Adds it to the total for **B=True** or **B=False** depending on the current `b`.
+
+---
+
+### 4. **Final Execution and Output**
+
+```python
+result = query_burglary(johnCalls=True, maryCalls=True)
+print(f"P(Burglary | JohnCalls=True, MaryCalls=True): {result[True]:.5f}")
+```
+
+You run the query assuming both **John and Mary have called** (evidence), and print the **posterior probability** that a **burglary actually happened**.
+
+---
+
+## 🧪 Sample Output
+
+```txt
+P(Burglary | JohnCalls=True, MaryCalls=True): 0.28417
+```
+
+It means: **There is about a 28.4% chance** of burglary, given that both John and Mary called. This makes sense since both tend to call when the alarm rings.
+
+---
+
+## ✅ Summary
+
+| Concept | Code |
+|--------|------|
+| Represent Bayesian Network | Using nested dictionaries |
+| Evidence variables | Fixed in `query_burglary(johnCalls=True, maryCalls=True)` |
+| Hidden variables | B, E, A — looped with `product([True, False], repeat=3)` |
+| Inference | By calculating all possible worlds and summing probabilities |
+| Normalization | Ensures final result is a valid probability distribution |
+
+---
+
+Let me know if you want to **extend this with variable elimination, sampling methods**, or **visualize the network**!

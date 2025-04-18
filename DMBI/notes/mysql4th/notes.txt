@@ -1,0 +1,161 @@
+Got it! You want to create the **Star and Snowflake schemas** using **MySQL Workbench** instead of MS SQL Server. Here's a complete guide for both schemas using **MySQL Workbench**, step-by-step.
+
+---
+
+## ✅ What You Need
+- **MySQL Workbench** installed
+- A running MySQL Server (e.g., `localhost`)
+- A new SQL script or model to execute queries
+
+---
+
+# 🌟 PART 1: STAR SCHEMA in MySQL Workbench
+
+### Step 1: Create a New Database
+
+```sql
+CREATE DATABASE SalesDW_Star;
+USE SalesDW_Star;
+```
+
+---
+
+### Step 2: Create Denormalized Dimension Tables
+
+```sql
+-- Date Dimension
+CREATE TABLE DimDate (
+    DateID INT PRIMARY KEY,
+    FullDate DATE,
+    Month VARCHAR(20),
+    Quarter VARCHAR(10),
+    Year INT
+);
+
+-- Product Dimension (Category directly included)
+CREATE TABLE DimProduct (
+    ProductID INT PRIMARY KEY,
+    ProductName VARCHAR(50),
+    CategoryName VARCHAR(50)
+);
+
+-- Customer Dimension
+CREATE TABLE DimCustomer (
+    CustomerID INT PRIMARY KEY,
+    CustomerName VARCHAR(100),
+    City VARCHAR(50),
+    Region VARCHAR(50)
+);
+```
+
+---
+
+### Step 3: Create Fact Table
+
+```sql
+CREATE TABLE FactSales (
+    SaleID INT PRIMARY KEY,
+    DateID INT,
+    ProductID INT,
+    CustomerID INT,
+    Quantity INT,
+    TotalAmount DECIMAL(10,2),
+    FOREIGN KEY (DateID) REFERENCES DimDate(DateID),
+    FOREIGN KEY (ProductID) REFERENCES DimProduct(ProductID),
+    FOREIGN KEY (CustomerID) REFERENCES DimCustomer(CustomerID)
+);
+```
+
+---
+
+### Step 4: Insert Sample Data
+
+```sql
+INSERT INTO DimDate VALUES (1, '2024-01-01', 'January', 'Q1', 2024);
+INSERT INTO DimProduct VALUES (101, 'T-Shirt', 'Clothing');
+INSERT INTO DimCustomer VALUES (201, 'Alice', 'Mumbai', 'West');
+
+INSERT INTO FactSales VALUES (1, 1, 101, 201, 2, 600.00);
+```
+
+---
+
+# ❄️ PART 2: SNOWFLAKE SCHEMA in MySQL Workbench
+
+### Step 1: Create a New Database
+
+```sql
+CREATE DATABASE SalesDW_Snowflake;
+USE SalesDW_Snowflake;
+```
+
+---
+
+### Step 2: Create Normalized Dimension Tables
+
+```sql
+-- Category Dimension
+CREATE TABLE DimCategory (
+    CategoryID INT PRIMARY KEY,
+    CategoryName VARCHAR(50)
+);
+
+-- Product Dimension (references category)
+CREATE TABLE DimProduct (
+    ProductID INT PRIMARY KEY,
+    ProductName VARCHAR(50),
+    CategoryID INT,
+    FOREIGN KEY (CategoryID) REFERENCES DimCategory(CategoryID)
+);
+
+-- Customer Dimension
+CREATE TABLE DimCustomer (
+    CustomerID INT PRIMARY KEY,
+    CustomerName VARCHAR(100),
+    City VARCHAR(50),
+    Region VARCHAR(50)
+);
+
+-- Date Dimension
+CREATE TABLE DimDate (
+    DateID INT PRIMARY KEY,
+    FullDate DATE,
+    Month VARCHAR(20),
+    Quarter VARCHAR(10),
+    Year INT
+);
+```
+
+---
+
+### Step 3: Create Fact Table
+
+```sql
+CREATE TABLE FactSales (
+    SaleID INT PRIMARY KEY,
+    DateID INT,
+    ProductID INT,
+    CustomerID INT,
+    Quantity INT,
+    TotalAmount DECIMAL(10,2),
+    FOREIGN KEY (DateID) REFERENCES DimDate(DateID),
+    FOREIGN KEY (ProductID) REFERENCES DimProduct(ProductID),
+    FOREIGN KEY (CustomerID) REFERENCES DimCustomer(CustomerID)
+);
+```
+
+---
+
+### Step 4: Insert Sample Data
+
+```sql
+INSERT INTO DimCategory VALUES (1, 'Clothing');
+INSERT INTO DimProduct VALUES (101, 'T-Shirt', 1);
+INSERT INTO DimCustomer VALUES (201, 'Alice', 'Mumbai', 'West');
+INSERT INTO DimDate VALUES (1, '2024-01-01', 'January', 'Q1', 2024);
+
+INSERT INTO FactSales VALUES (1, 1, 101, 201, 2, 600.00);
+```
+
+---
+
